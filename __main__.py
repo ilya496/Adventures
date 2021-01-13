@@ -1,8 +1,14 @@
-import pygame
+import pygame, player
 
 pygame.init()
-surface = pygame.display.set_mode([600, 400])
+screen = pygame.display.set_mode([600, 400])
+
+player = player.Player()
+all_sprites = pygame.sprite.Group()
+all_sprites.add(player)
 
 while True:
-
     pygame.event.get()
+    all_sprites.draw(screen)
+    pygame.display.flip()
+
