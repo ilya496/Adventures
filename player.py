@@ -9,41 +9,61 @@ class Player(pygame.sprite.Sprite):
 
         self.image = pygame.image.load('resources/pictures/main_player.png').convert_alpha()
         self.rect = pygame.rect.Rect(100, 100, self.image.get_width(), self.image.get_height())
+        self.hp = 100
+        self.damage = 3
 
-        # OPTIMIZE а что будет, если я оба значения поставлю в True? или в False?
-        #   лучше сделать так, чтобы всегда было понятно, куда повернут игрок. Достаточно одной переменной.
-        self.flipped_right = True
-        self.flipped_left = False
+        self.flipped = 'right'
 
+    def flip_image(self):
+        self.image = pygame.transform.flip(self.image, True, False)
 
     # OPTIMIZE эта функция знает слишком много:
     #   назначение клавиш, правила перемещения игрока, правила подготовки картинки игрока
-    def move(self, key):
+    def move_rect(self, obj: pygame.Rect, axis: str, amount: int):
+        # Определяем по какой оси нужно двигать
+        if axis == 'y':
+            obj.y += amount
+        elif axis == 'x':
+            obj.x += amount
+            # Проверяем если двигаем вправо
+            if amount > 0:
+                if self.flipped == 'left':
+                    self.flip_image()
+                    self.flipped = 'right'
+            # Иначе двигаем влево
+            else:
+                if self.flipped == 'right':
+                    self.flip_image()
+                    self.flipped = 'left'
 
-        if key == pygame.K_w:
-            self.rect.y -= PLAYER_STEP
+        # if key == pygame.K_w:
+        #     obj.y -= PLAYER_STEP
+        #
+        # elif key == pygame.K_s:
+        #     obj.y += PLAYER_STEP
+        #
+        # elif key == pygame.K_d:
+        #     obj.x += PLAYER_STEP
+        #     if self.flipped == 'left':
+        #         self.flip_image()
+        #         self.flipped = 'right'
+        #
+        # elif key == pygame.K_a:
+        #     obj.x -= PLAYER_STEP
+        #     if self.flipped == 'right':
+        #         self.flip_image()
+        #         self.flipped = 'left'
 
-        elif key == pygame.K_s:
-            self.rect.y += PLAYER_STEP
-
-        elif key == pygame.K_d:
-            self.rect.x += PLAYER_STEP
-            if self.flipped_left:
-                self.image = pygame.transform.flip(self.image, True, False)
-                self.flipped_right = True
-                self.flipped_left = False
-
-        elif key == pygame.K_a:
-            self.rect.x -= PLAYER_STEP
-            if self.flipped_right:
-                self.image = pygame.transform.flip(self.image, True, False)
-                self.flipped_right = False
-                self.flipped_left = True
-
-
-    def process_events(self):
+    def process_events(self, events):
         # FIXME с этим будут проблемы. Никто другой события обработать уже не сможет
         #   Чтобы понять, в чем проблема - попробуй сделать закрытие на крестик не меняя эту строку.
-        for event in pygame.event.get():
+        for event in events:
             if event.type == pygame.KEYDOWN:
-                self.move(event.key)
+                if event.key == pygame.K_w:
+                    self.move_rect(self.rect, 'y', -PLAYER_STEP)
+                elif event.key == pygame.K_a:
+                    self.move_rect(self.rect, 'x', -PLAYER_STEP)
+                elif event.key == pygame.K_s:
+                    self.move_rect(self.rect, 'y', PLAYER_STEP)
+                elif event.key == pygame.K_d:
+                    self.move_rect(self.rect, 'x', PLAYER_STEP)

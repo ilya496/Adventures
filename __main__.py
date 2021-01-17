@@ -12,9 +12,12 @@ all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 
 while True:
-    # pygame.event.get()
+    events = pygame.event.get()
+    for event in events:
+        if event.type == pygame.QUIT:
+            exit()
     screen.fill([0, 0, 0])
-    player.process_events()
+    player.process_events(events)
     all_sprites.draw(screen)
     pygame.display.flip()
     clock.tick(60)
