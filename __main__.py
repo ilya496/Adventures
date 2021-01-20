@@ -11,6 +11,7 @@ player = player.Player()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 
+
 while True:
     events = pygame.event.get()
     for event in events:

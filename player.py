@@ -10,7 +10,7 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.image.load('resources/pictures/main_player.png').convert_alpha()
         self.rect = pygame.rect.Rect(100, 100, self.image.get_width(), self.image.get_height())
         self.hp = 100
-        self.damage = 3
+        self.damage = 5
 
         self.flipped = 'right'
 
