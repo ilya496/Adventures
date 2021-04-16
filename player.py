@@ -16,7 +16,10 @@ class Player(pygame.sprite.Sprite):
         self.rect = pygame.rect.Rect(0, 0, self.image_orig.get_width(), self.image_orig.get_height())
         self.x = self.rect.x
         self.y = self.rect.y
+
         self.interact_rect = pygame.rect.Rect(self.rect.x, self.rect.y, self.rect.w + 150, self.rect.h + 300)
+        #OPTIMIZE эта переменная нигде не используется. Встать на нее кареткой и Alt+F7 чтобы это увидеть
+
         self.hp_callback = None
         self.max_hp = player_max_hp
         self.current_hp = self.max_hp

@@ -15,6 +15,7 @@ class Inventory(sprite.Sprite):
         self.max_number_of_item_in_cell = 100
         self.cell_size = 50
 
+        # OPTIMIZE Имена аттрибутов, которые не предполагается использовать снаружи, лучше начинать с _
         self.arial_font = font.match_font('Arial')
         self.cell_name_font = font.Font(self.arial_font, 15)
         self.numbers_font = font.Font(self.arial_font, 25)
@@ -29,6 +30,8 @@ class Inventory(sprite.Sprite):
 
     def _fill_cell(self, key, value, count):
         assert key in self.dict, 'Несуществующий ключ словаря инвентаря'
+
+        # OPTIMIZE не сильно важно. Но типы это объекты. Их лучше сравнивать через is, а не через ==
         assert type(self.dict[key]['object']) == type(value) or self.dict[key]['object'] is None
 
         if self.dict[key]['object'] is None:
@@ -47,19 +50,20 @@ class Inventory(sprite.Sprite):
         for key, val in self.dict.items():
             if type(val['object']) is type(value) and val['count'] < self.max_number_of_item_in_cell:
                 count = self._fill_cell(key, value, count)
-                self._generate_image()
+                self._generate_image() #OPTIMIZE зачем перерисовывать при изменении каждой ячейки
                 if count == 0:
                     return
         for key, val in self.dict.items():
             if val['object'] is None:
                 count = self._fill_cell(key, value, count)
-                self._generate_image()
+                self._generate_image() #OPTIMIZE зачем перерисовывать при изменении каждой ячейки
                 if count == 0:
                     return
 
     @staticmethod
     def _shift_to_centering(rect1: Rect, rect2: Rect):
         """ Вычисляем расстояние от центра одного прямоугольника до центра другого прямоугольника """
+        # OPTIMIZE вся функция делается в одну строку с использованием abs
         rect1_center_x = rect1.centerx
         rect2_center_x = rect2.centerx
         if rect1_center_x > rect2_center_x:
@@ -70,6 +74,8 @@ class Inventory(sprite.Sprite):
     def _generate_cells_rect(self, header_rect: Rect):
         """ Так как у нас инвентарь делится на заголовок и часть с клетками,
         то надо получить верхнюю часть инвентаря т.е. заголовок, чтобы мы могли правильно заполнить клетки """
+
+        #FIXME откуда тут взялась цифра 0.8. У нас же есть header_rect. Он сам про себя все знает.
         content_rect = Rect(0, header_rect.h,
                             self.image.get_width(), self.image.get_height() * 0.8)
         cells_rects = []
@@ -89,12 +95,22 @@ class Inventory(sprite.Sprite):
         number = self.numbers_font.render(count, True, [0, 0, 0])  # Количество предмета
 
         # Достаем картинку из папки resources/pictures с названием класса и делаем ей размер прямоугольника
+        # OPTIMIZE str(val) для получения названия предмета - это ок. А вот для поиска картинки - не очень.
+        # Если у нас будет предмет, который должен называться !Бомба!, то такой файл с картинкой не сможем создать.
+
+        # OPTIMIZE при работе с файлами нужно учитывать, что файла может не оказаться на месте. По этому поводу тоже нужно что-то делать.
+        # как вариант - рисовать что-то по-умолчанию. Можно и просто ошибку выкидывать.
+
         if val is not None:
             img = transform.scale(image.load('resources/pictures/%s.png' % str(val).lower()), size)
 
         self.image.blit(img, pos) if img else self.image.blit(Surface(size), pos)  # Рисуем картинка которую мы достали
-        self.image.blit(name, (name.get_rect().x + self._shift_to_centering(cell_rect, name.get_rect()),
-                               pos[1]))  # Рисуем название объекта
+
+        # self.image.blit(name, (name.get_rect().x + self._shift_to_centering(cell_rect, name.get_rect()),
+        #                        pos[1]))  # Рисуем название объекта
+        #OPTIMIZE Surface.get_rect() может "патчить" возвращаемый прямоугольник переданными параметрами
+        self.image.blit(name, name.get_rect(centerx=cell_rect.centerx, y=pos[1]))
+
         self.image.blit(number, (cell_rect.right - number.get_rect().w,
                                  cell_rect.bottom - number.get_rect().h + 5))  # Рисуем количество предмета
 
@@ -105,17 +121,26 @@ class Inventory(sprite.Sprite):
         cells_rects = self._generate_cells_rect(header_rect)  # Создаем сетку прямоугольников
 
         for i in self.dict:  # Вызываем для каждой клетки создание картинки
+
+            #OPTIMIZE если можно ошибку предотвратить - лучшее ее предотвратить, а не сделать и отловить
+            # if i>len(cells_rects)-1: ...
             try:
                 self._generate_cell_image(self.dict[i], cells_rects[i])
             except IndexError:  # Если в self.dict элементов больше чем в cells_rects кидаем ошибку
                 except_string = 'Инвентарь не может вместить больше чем %d предметов' % i
                 raise Exception(except_string)
 
-        self.image.blit(header, (self._shift_to_centering(header_rect, self.image.get_rect()),
-                                 header_rect.y))  # Рисуем заголовок
+        # self.image.blit(header, (self._shift_to_centering(header_rect, self.image.get_rect()), header_rect.y))  # Рисуем заголовок
+
+        #OPTIMIZE просто для примера. Можно сделать так. Тогда _shift_to_centering не нужен вообще
+        header_rect.centerx = self.image.get_rect().centerx
+        self.image.blit(header, header_rect)  # Рисуем заголовок
 
     @classmethod
     def get_inventory(cls, num_of_cells=None):
         if cls.inventory is None:
             cls.inventory = cls(num_of_cells)
         return cls.inventory
+
+
+    # TODO а так вообще все неплохо написано.

@@ -133,7 +133,7 @@ class Game:
             if event.type == pygame.QUIT:
                 exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_e:
+                if event.key == pygame.K_e: #OPTIMIZE можно его и скрывать на повторное нажатие этой же клавиши
                     self.show_inventory()
             if event.type == pygame.USEREVENT:
                 if event.user_type == UI_BUTTON_PRESSED:
